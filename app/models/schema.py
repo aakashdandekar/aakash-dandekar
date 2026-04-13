@@ -47,6 +47,12 @@ class ContactIn(BaseModel):
     is_external: bool     = True
     sort_order: int       = 0
 
+class MessageIn(BaseModel):
+    name: str
+    email: str
+    projectType: str
+    message: str
+
 
 # ── Row parsers ────────────────────────────────────────────────────────────────
 
@@ -72,4 +78,7 @@ def parse_contact(doc: dict) -> dict:
     return d
 
 def parse_generic(doc: dict) -> dict:
+    return _base_parse(doc)
+
+def parse_message(doc: dict) -> dict:
     return _base_parse(doc)

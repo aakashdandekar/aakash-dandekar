@@ -7,7 +7,7 @@ from bson import ObjectId
 from bson.errors import InvalidId
 from app.core.config import settings
 from app.database.db import init_db, get_db
-from app.models.schema import ProjectIn, parse_project, ServiceIn, parse_service, SkillGroupIn, parse_skill_group, ChipIn, ValueIn, parse_generic, ContactIn, parse_contact
+from app.models.schema import ProjectIn, parse_project, ServiceIn, parse_service, SkillGroupIn, parse_skill_group, ChipIn, ValueIn, parse_generic, ContactIn, parse_contact, MessageIn, parse_message
 
 app = FastAPI(
     title=settings.APP_NAME,
@@ -211,6 +211,25 @@ def update_contact(cid: str, ct: ContactIn):
 def delete_contact(cid: str):
     db = get_db()
     db.contact_items.delete_one({"_id": _valid_id(cid)})
+
+
+# ── Messages ───────────────────────────────────────────────────────────────────
+@app.get("/api/messages", tags=["messages"])
+def list_messages():
+    db = get_db()
+    # Sort backwards by _id to always put newest messages at the top
+    return [parse_message(doc) for doc in db.messages.find().sort("_id", -1)]
+
+@app.post("/api/messages", status_code=201, tags=["messages"])
+def create_message(msg: MessageIn):
+    db = get_db()
+    db.messages.insert_one(msg.dict())
+    return {"success": True}
+
+@app.delete("/api/messages/{mid}", status_code=204, tags=["messages"])
+def delete_message(mid: str):
+    db = get_db()
+    db.messages.delete_one({"_id": _valid_id(mid)})
 
 
 # ── Static Mappings ────────────────────────────────────────────────────────────

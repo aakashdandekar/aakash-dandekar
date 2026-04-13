@@ -98,14 +98,34 @@ createApp({
     },
 
     // ── Contact form submit ──────────────────────────────────────────────────
-    submitForm() {
+    async submitForm() {
       if (!this.form.name || !this.form.email || !this.form.message) return;
       this.formSubmitting = true;
-      setTimeout(() => {
-        this.formSubmitting = false;
+      try {
+        const payload = {
+          name: this.form.name,
+          email: this.form.email,
+          projectType: this.form.projectType,
+          message: this.form.message
+        };
+        const res = await fetch(`${API_BASE}/api/messages`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (!res.ok) throw new Error('Failed to send message');
+        
         this.formSubmitted  = true;
         this.form = { name: '', email: '', projectType: '', message: '' };
-      }, 1400);
+        
+        // Hide success message after 6 seconds
+        setTimeout(() => { this.formSubmitted = false; }, 6000);
+      } catch (err) {
+        console.error('[Draxen AI] Contact form error:', err);
+        alert("There was an issue sending your message. Please email me directly!");
+      } finally {
+        this.formSubmitting = false;
+      }
     },
 
     // ── Particle canvas ──────────────────────────────────────────────────────

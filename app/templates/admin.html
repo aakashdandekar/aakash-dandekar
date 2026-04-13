@@ -441,6 +441,37 @@ tbody tr:hover { background: rgba(255,255,255,0.02); }
       </div>
     </template>
 
+    <!-- MESSAGES -->
+    <template v-if="tab === 'messages'">
+      <div class="page-header">
+        <div><h1>Inquiries</h1><p>Contact form submissions from the frontend.</p></div>
+      </div>
+      <div class="table-card">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>From</th><th>Email</th><th>Project Type</th><th>Message</th><th></th></tr></thead>
+            
+            <tbody v-if="loading">
+              <tr v-for="n in 5" :key="n"><td colspan="5"><div class="skeleton-row"><div class="skeleton"></div><div class="skeleton"></div></div></td></tr>
+            </tbody>
+            <tbody v-else-if="db.messages.length === 0">
+              <tr><td colspan="5"><div class="empty-state">No messages yet.</div></td></tr>
+            </tbody>
+            <tbody v-else>
+              <tr v-for="m in db.messages" :key="m.id">
+                <td style="font-weight: 600;">{{ m.name }}</td>
+                <td style="font-family: var(--mono); color: var(--muted2);">{{ m.email }}</td>
+                <td><span class="abbr-tag" style="background: rgba(124, 111, 224, 0.12); color: var(--purple); border-color: rgba(124, 111, 224, 0.2);">{{ m.projectType || 'General' }}</span></td>
+                <td style="max-width: 300px; white-space: normal; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.4; color: var(--text); padding-top: 14px;">{{ m.message }}</td>
+                <td style="vertical-align: top;"><div class="actions"><button class="btn btn-danger btn-sm" @click="doDelete('messages',m.id)">Delete</button></div></td>
+              </tr>
+            </tbody>
+
+          </table>
+        </div>
+      </div>
+    </template>
+
   </main>
 
   <!-- ── SIDE PANEL FOR FORMS ── -->
@@ -565,7 +596,7 @@ createApp({
       q: '',
       loading: true,
       saving: false,
-      db: { projects:[], services:[], skillGroups:[], chips:[], values:[], contacts:[] },
+      db: { projects:[], services:[], skillGroups:[], chips:[], values:[], contacts:[], messages:[] },
       
       nav: [
         { key:'projects', label:'Projects', icon:'◈' },
@@ -573,6 +604,7 @@ createApp({
         { key:'skills', label:'Skill Groups', icon:'◉' },
         { key:'about', label:'About Area', icon:'◎' },
         { key:'contact', label:'Contact Info', icon:'◐' },
+        { key:'messages', label:'Inquiries', icon:'✉' },
       ],
 
       panel: { open: false, type: '', id: null },
@@ -588,7 +620,8 @@ createApp({
         services: this.db.services.length,
         skills: this.db.skillGroups.length,
         about: this.db.chips.length + this.db.values.length,
-        contact: this.db.contacts.length
+        contact: this.db.contacts.length,
+        messages: this.db.messages.length
       }
     },
     filteredProjects() {
@@ -635,8 +668,12 @@ createApp({
     async fetchAll() {
       this.loading = true;
       try {
-        const res = await fetch('/api/site-data');
-        const data = await res.json();
+        const [siteRes, msgsRes] = await Promise.all([
+          fetch('/api/site-data'),
+          fetch('/api/messages')
+        ]);
+        const data = await siteRes.json();
+        const msgs = msgsRes.ok ? await msgsRes.json() : [];
         
         this.db.projects = data.projects || [];
         this.db.services = data.services || [];
@@ -644,6 +681,7 @@ createApp({
         this.db.chips = data.chips || [];
         this.db.values = data.values || [];
         this.db.contacts = data.contactItems || [];
+        this.db.messages = msgs;
       } catch(e) {
         this.notify('Failed to load DB data', 'error');
       }
