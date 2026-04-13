@@ -50,24 +50,26 @@ class ContactIn(BaseModel):
 
 # ── Row parsers ────────────────────────────────────────────────────────────────
 
-def parse_project(row) -> dict:
-    d = dict(row)
-    d["tags"]    = json.loads(d["tags"])
-    d["stack"]   = json.loads(d["stack"])
-    d["featured"] = bool(d["featured"])
+def _base_parse(doc: dict) -> dict:
+    if "_id" in doc:
+        doc["id"] = str(doc.pop("_id"))
+    return doc
+
+def parse_project(doc: dict) -> dict:
+    d = _base_parse(doc)
+    d["featured"] = bool(d.get("featured", False))
     return d
 
-def parse_service(row) -> dict:
-    d = dict(row)
-    d["list_items"] = json.loads(d["list_items"])
+def parse_service(doc: dict) -> dict:
+    return _base_parse(doc)
+
+def parse_skill_group(doc: dict) -> dict:
+    return _base_parse(doc)
+
+def parse_contact(doc: dict) -> dict:
+    d = _base_parse(doc)
+    d["is_external"] = bool(d.get("is_external", True))
     return d
 
-def parse_skill_group(row) -> dict:
-    d = dict(row)
-    d["skills"] = json.loads(d["skills"])
-    return d
-
-def parse_contact(row) -> dict:
-    d = dict(row)
-    d["is_external"] = bool(d["is_external"])
-    return d
+def parse_generic(doc: dict) -> dict:
+    return _base_parse(doc)
