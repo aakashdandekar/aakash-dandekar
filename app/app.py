@@ -235,7 +235,7 @@ def delete_message(mid: str):
 # ── Static Mappings ────────────────────────────────────────────────────────────
 app.mount("/static", StaticFiles(directory=settings.STATIC_DIR), name="static")
 
-@app.get("/", response_class=HTMLResponse, tags=["site"])
+@app.api_route("/", methods=["GET", "HEAD"], response_class=HTMLResponse, tags=["site"])
 def index_page():
     index_html = os.path.join(settings.TEMPLATES_DIR, "index.html")
     with open(index_html, "r", encoding="utf-8") as f:
