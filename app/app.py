@@ -5,9 +5,9 @@ from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from bson import ObjectId
 from bson.errors import InvalidId
-from core.config import settings
-from database.db import init_db, get_db
-from models.schema import ProjectIn, parse_project, ServiceIn, parse_service, SkillGroupIn, parse_skill_group, ChipIn, ValueIn, parse_generic, ContactIn, parse_contact
+from app.core.config import settings
+from app.database.db import init_db, get_db
+from app.models.schema import ProjectIn, parse_project, ServiceIn, parse_service, SkillGroupIn, parse_skill_group, ChipIn, ValueIn, parse_generic, ContactIn, parse_contact
 
 app = FastAPI(
     title=settings.APP_NAME,

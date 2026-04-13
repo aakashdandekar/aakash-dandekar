@@ -1,7 +1,7 @@
 """Database connection and initialisation."""
 from pymongo import MongoClient
 from pymongo.database import Database
-from ..core.config import settings
+from app.core.config import settings
 
 _client = None
 
