@@ -216,6 +216,12 @@ def delete_contact(cid: str):
 # ── Static Mappings ────────────────────────────────────────────────────────────
 app.mount("/static", StaticFiles(directory=settings.STATIC_DIR), name="static")
 
+@app.get("/", response_class=HTMLResponse, tags=["site"])
+def index_page():
+    index_html = os.path.join(settings.TEMPLATES_DIR, "index.html")
+    with open(index_html, "r", encoding="utf-8") as f:
+        return HTMLResponse(content=f.read())
+
 @app.get("/admin", response_class=HTMLResponse, tags=["site"])
 def admin_page():
     admin_html = os.path.join(settings.TEMPLATES_DIR, "admin.html")
