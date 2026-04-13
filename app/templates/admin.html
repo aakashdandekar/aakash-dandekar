@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Draxen AI — Admin Console</title>
+<script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+<style>
+/* ── Reset & Tokens ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:        #080c14;
+  --surface:   #0e1420;
+  --surface2:  #141c2c;
+  --border:    rgba(255,255,255,0.07);
+  --border2:   rgba(255,255,255,0.12);
+  --blue:      #4a8fe8;
+  --blue-dim:  rgba(74,143,232,0.12);
+  --purple:    #7c6fe0;
+  --green:     #34d399;
+  --red:       #f87171;
+  --yellow:    #fbbf24;
+  --text:      #e2e8f4;
+  --muted:     #6b7a99;
+  --muted2:    #8892aa;
+  --mono:      'JetBrains Mono','Consolas',monospace;
+  --font:      'Inter','Segoe UI',system-ui,sans-serif;
+  --r:         8px;
+  --r-lg:      12px;
+  --shadow:    0 8px 32px rgba(0,0,0,0.4);
+  --transition: 0.18s ease;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 14px;
+  line-height: 1.5;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+a { color: inherit; text-decoration: none; }
+
+/* ── Layout ── */
+.layout { display: grid; grid-template-columns: 240px 1fr; grid-template-rows: 52px 1fr; min-height: 100vh; }
+
+.topbar {
+  grid-column: 1 / -1;
+  display: flex; align-items: center; gap: 12px;
+  padding: 0 24px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 100;
+}
+.topbar-logo { font-size: 1rem; font-weight: 800; letter-spacing: 0.08em; }
+.topbar-logo .ai { color: var(--blue); }
+.topbar-divider { width: 1px; height: 18px; background: var(--border2); margin: 0 8px; }
+.topbar-title { color: var(--muted2); font-size: 0.8rem; }
+.topbar-right { margin-left: auto; display: flex; align-items: center; gap: 16px; }
+
+.status-badge {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 0.72rem; color: var(--green);
+  background: rgba(52,211,153,0.08); border: 1px solid rgba(52,211,153,0.2);
+  padding: 3px 10px; border-radius: 99px;
+}
+.status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+.topbar-link { font-size: 0.78rem; color: var(--muted); transition: color var(--transition); cursor: pointer; }
+.topbar-link:hover { color: var(--text); }
+
+.sidebar {
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  padding: 20px 0 20px;
+  position: sticky; top: 52px; height: calc(100vh - 52px);
+}
+.sidebar-section-label {
+  font-size: 0.67rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.1em;
+  color: var(--muted); padding: 12px 20px 6px;
+}
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 20px; cursor: pointer;
+  color: var(--muted2); font-size: 0.85rem; font-weight: 500;
+  border-left: 2px solid transparent;
+  transition: all var(--transition);
+  user-select: none;
+}
+.nav-item:hover { background: rgba(255,255,255,0.03); color: var(--text); }
+.nav-item.active { background: var(--blue-dim); color: var(--blue); border-left-color: var(--blue); }
+.nav-icon {
+  width: 28px; height: 28px; border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.95rem;
+  background: rgba(255,255,255,0.04);
+}
+.nav-item.active .nav-icon { background: rgba(74,143,232,0.18); }
+.nav-count {
+  margin-left: auto;
+  font-size: 0.68rem; font-family: var(--mono);
+  color: var(--muted); background: rgba(255,255,255,0.05);
+  padding: 1px 7px; border-radius: 99px;
+}
+
+.main { padding: 28px 32px; overflow-y: auto; }
+
+/* ── Content Elements ── */
+.page-header { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 24px; }
+.page-header h1 { font-size: 1.3rem; font-weight: 700; margin-bottom: 2px; }
+.page-header p { color: var(--muted); font-size: 0.82rem; }
+
+.stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px,1fr)); gap: 12px; margin-bottom: 24px; }
+.stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 16px 18px; display: flex; flex-direction: column; gap: 6px; }
+.stat-label { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+.stat-value { font-size: 1.6rem; font-weight: 700; font-family: var(--mono); line-height: 1; }
+.stat-card.blue .stat-value { color: var(--blue); }
+.stat-card.purple .stat-value { color: var(--purple); }
+.stat-card.green .stat-value { color: var(--green); }
+.stat-card.yellow .stat-value { color: var(--yellow); }
+
+.toolbar { display: flex; margin-bottom: 14px; }
+.search-input {
+  flex: 1; max-width: 280px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r); padding: 7px 12px 7px 32px;
+  color: var(--text); font-size: 0.83rem; outline: none; transition: border-color var(--transition);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%236b7a99' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='M21 21l-4.35-4.35'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: 10px center;
+}
+.search-input:focus { border-color: var(--blue); background-color: var(--surface2); }
+
+.table-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); overflow: hidden; }
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; }
+th { text-align: left; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); padding: 10px 16px; background: var(--surface2); border-bottom: 1px solid var(--border); white-space: nowrap; }
+td { padding: 11px 16px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+tr:last-child td { border-bottom: none; }
+tbody tr:hover { background: rgba(255,255,255,0.02); }
+.empty-state { text-align: center; padding: 48px; color: var(--muted); font-size: 0.85rem; }
+
+.abbr-tag { font-family: var(--mono); font-size: 0.7rem; font-weight: 700; padding: 2px 8px; border-radius: 5px; background: rgba(74,143,232,0.12); color: var(--blue); border: 1px solid rgba(74,143,232,0.2); }
+.tag-pill { display: inline-block; font-size: 0.68rem; padding: 2px 8px; border-radius: 99px; background: rgba(255,255,255,0.05); border: 1px solid var(--border2); color: var(--muted2); margin: 2px 2px 2px 0; }
+.featured-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 0.7rem; color: var(--green); background: rgba(52,211,153,0.08); border: 1px solid rgba(52,211,153,0.2); padding: 2px 8px; border-radius: 99px; }
+.color-chip { display: inline-flex; align-items: center; gap: 6px; font-size: 0.8rem; text-transform: capitalize; }
+.color-dot { width: 10px; height: 10px; border-radius: 50%; }
+.dot-cyan { background: #4a8fe8; } .dot-purple { background: #7c6fe0; } .dot-blue { background: #3b82f6; } .dot-green { background: #34d399; }
+.td-title { font-weight: 600; font-size: 0.85rem; max-width: 240px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.td-desc { color: var(--muted); font-size: 0.8rem; max-width: 280px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* ── Handlers ── */
+.actions { display: flex; gap: 6px; align-items: center; }
+.btn { display: inline-flex; align-items: center; gap: 5px; padding: 6px 13px; border-radius: var(--r); font-size: 0.78rem; font-weight: 600; cursor: pointer; border: 1px solid transparent; transition: all var(--transition); white-space: nowrap; outline: none; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-primary { background: var(--blue); color: #fff; border-color: var(--blue); }
+.btn-primary:hover:not(:disabled) { background: #5a9fef; }
+.btn-ghost { background: rgba(255,255,255,0.04); color: var(--text); border-color: var(--border2); }
+.btn-ghost:hover { background: rgba(255,255,255,0.08); }
+.btn-edit { background: rgba(74,143,232,0.08); color: var(--blue); border-color: rgba(74,143,232,0.22); }
+.btn-edit:hover { background: rgba(74,143,232,0.16); }
+.btn-danger { background: rgba(248,113,113,0.08); color: var(--red); border-color: rgba(248,113,113,0.22); }
+.btn-danger:hover { background: rgba(248,113,113,0.16); }
+.btn-sm { padding: 4px 10px; font-size: 0.73rem; }
+
+/* ── Panel / Drawer ── */
+.panel-mask { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; backdrop-filter: blur(3px); opacity: 0; pointer-events: none; transition: opacity var(--transition); }
+.panel-mask.open { opacity: 1; pointer-events: all; }
+.panel { position: fixed; top: 0; right: 0; bottom: 0; width: min(520px, 95vw); background: var(--surface); border-left: 1px solid var(--border2); display: flex; flex-direction: column; transform: translateX(100%); transition: transform 0.25s cubic-bezier(0.16,1,0.3,1); box-shadow: -8px 0 40px rgba(0,0,0,0.5); z-index: 201; }
+.panel.open { transform: translateX(0); }
+.panel-header { padding: 20px 24px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.panel-header h2 { font-size: 1rem; font-weight: 700; }
+.panel-close { background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: var(--muted); border-radius: 6px; cursor: pointer; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; }
+.panel-close:hover { background: rgba(255,255,255,0.1); color: var(--text); }
+.panel-body { padding: 24px; flex: 1; overflow-y: auto; }
+.panel-footer { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; gap: 10px; justify-content: flex-end; }
+
+/* ── Form Inputs ── */
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.form-g { margin-bottom: 16px; }
+.form-g label { display: block; font-size: 0.73rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-bottom: 6px; }
+.form-g input, .form-g textarea, .form-g select { width: 100%; padding: 9px 12px; background: var(--surface2); border: 1px solid var(--border2); border-radius: var(--r); color: var(--text); font-size: 0.85rem; font-family: var(--font); outline: none; transition: border-color var(--transition); }
+.form-g input:focus, .form-g textarea:focus, .form-g select:focus { border-color: var(--blue); box-shadow: 0 0 0 2px rgba(74,143,232,0.15); }
+.form-g textarea { resize: vertical; min-height: 80px; }
+.form-g select option { background: var(--surface2); }
+.form-g .hint { font-size: 0.72rem; color: var(--muted); margin-top: 5px; }
+
+/* ── PIN Authentication UI ── */
+.pin-mask {
+  position: fixed; inset: 0;
+  background: rgba(8, 12, 20, 0.85); /* Frosty backdrop against standard var(--bg) */
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  z-index: 9999;
+  display: flex; align-items: center; justify-content: center;
+}
+.pin-box {
+  background: var(--surface); border: 1px solid var(--border);
+  padding: 32px 40px; border-radius: var(--r-lg); text-align: center;
+  box-shadow: var(--shadow); width: 100%; max-width: 320px;
+}
+.pin-box h2 { margin-bottom: 24px; font-weight: 700; font-size: 1.2rem; }
+.pin-input {
+  width: 100%; text-align: center; font-size: 1.5rem; letter-spacing: 8px;
+  padding: 12px; background: var(--surface2); border: 1px solid var(--border2);
+  border-radius: var(--r); outline: none; color: var(--text);
+  margin-bottom: 20px; transition: border-color var(--transition);
+}
+.pin-input:focus { border-color: var(--blue); }
+
+/* ── Toasts ── */
+.toast-wrap { position: fixed; bottom: 24px; right: 24px; z-index: 500; display: flex; flex-direction: column; gap: 8px; }
+.toast { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-radius: var(--r-lg); font-size: 0.82rem; font-weight: 500; border: 1px solid; box-shadow: var(--shadow); animation: toast-in 0.25s cubic-bezier(0.16,1,0.3,1); min-width: 220px; }
+.toast.success { background: rgba(52,211,153,0.1); border-color: rgba(52,211,153,0.25); color: var(--green); }
+.toast.error   { background: rgba(248,113,113,0.1); border-color: rgba(248,113,113,0.25); color: var(--red); }
+.toast.info    { background: rgba(74,143,232,0.1);  border-color: rgba(74,143,232,0.25);  color: var(--blue); }
+@keyframes toast-in { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+
+/* ── Skeleton Loaders ── */
+.skeleton { background: linear-gradient(90deg, var(--surface2) 25%, rgba(255,255,255,0.04) 50%, var(--surface2) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 4px; height: 14px; }
+@keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+.skeleton-row { padding: 14px 16px; border-bottom: 1px solid var(--border); display: flex; gap: 12px; }
+.skeleton-row .skeleton:nth-child(1) { width: 50px; }
+.skeleton-row .skeleton:nth-child(2) { flex: 1; max-width: 200px; }
+</style>
+</head>
+<body>
+<div id="admin" class="layout">
+
+  <!-- ── PIN LOGIN OVERLAY ── -->
+  <div class="pin-mask" v-if="!unlocked">
+    <div class="pin-box">
+      <h2>Admin Access</h2>
+      <input type="password" class="pin-input" v-model="pinInput" @keyup.enter="checkPin" placeholder="••••" autofocus />
+      <button class="btn btn-primary" style="width: 100%; padding: 10px; font-size: 1rem; justify-content: center;" @click="checkPin">Unlock</button>
+      <div v-if="pinError" style="color: var(--red); margin-top: 12px; font-size: 0.85rem;">Incorrect PIN</div>
+    </div>
+  </div>
+
+  <!-- ── TOPBAR ── -->
+  <header class="topbar">
+    <div class="topbar-logo">DRAXEN<span class="ai">AI</span></div>
+    <div class="topbar-divider"></div>
+    <span class="topbar-title">Content Manager</span>
+    <div class="topbar-right">
+      <a class="topbar-link" href="/" target="_blank">↗ View Site</a>
+      <a class="topbar-link" href="/api/docs" target="_blank">API Docs</a>
+      <div v-if="unlocked" class="topbar-link" @click="logout" style="color: var(--red);">Logout</div>
+      <div class="status-badge"><span class="status-dot"></span>Live</div>
+    </div>
+  </header>
+
+  <!-- ── SIDEBAR ── -->
+  <nav class="sidebar">
+    <div class="sidebar-section-label">Content</div>
+    <div v-for="item in nav" :key="item.key"
+         class="nav-item" :class="{ active: tab === item.key }"
+         @click="tab = item.key">
+      <span class="nav-icon">{{ item.icon }}</span>
+      <span>{{ item.label }}</span>
+      <span class="nav-count" v-if="unlocked">{{ counts[item.key] }}</span>
+    </div>
+  </nav>
+
+  <!-- ── MAIN CONTENT ── -->
+  <main class="main" v-if="unlocked">
+    
+    <!-- PROJECTS -->
+    <template v-if="tab === 'projects'">
+      <div class="page-header">
+        <div><h1>Projects</h1><p>Portfolio projects displayed on the frontend.</p></div>
+        <button class="btn btn-primary" @click="openPanel('project')">+ New Project</button>
+      </div>
+      <div class="toolbar"><input class="search-input" v-model="q" placeholder="Search projects…" /></div>
+      <div class="table-card">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Abbr</th><th>Title</th><th>Tags</th><th>Color</th><th>Featured</th><th>Order</th><th></th></tr></thead>
+            
+            <!-- Robust tbody routing -->
+            <tbody v-if="loading">
+              <tr v-for="n in 5" :key="n"><td colspan="7"><div class="skeleton-row"><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div></div></td></tr>
+            </tbody>
+            <tbody v-else-if="filteredProjects.length === 0">
+              <tr><td colspan="7"><div class="empty-state">No projects found.</div></td></tr>
+            </tbody>
+            <tbody v-else>
+              <tr v-for="p in filteredProjects" :key="p.id">
+                <td><span class="abbr-tag">{{ p.abbr }}</span></td>
+                <td class="td-title">{{ p.title }}</td>
+                <td><span class="tag-pill" v-for="t in p.tags" :key="t">{{ t }}</span></td>
+                <td><span class="color-chip"><span class="color-dot" :class="'dot-'+p.color"></span>{{ p.color }}</span></td>
+                <td><span v-if="p.featured" class="featured-badge">Featured</span><span v-else style="color:var(--muted)">—</span></td>
+                <td style="color:var(--muted);font-family:var(--mono);">{{ p.sort_order }}</td>
+                <td><div class="actions"><button class="btn btn-edit btn-sm" @click="openPanel('project',p)">Edit</button><button class="btn btn-danger btn-sm" @click="doDelete('projects',p.id)">Delete</button></div></td>
+              </tr>
+            </tbody>
+
+          </table>
+        </div>
+      </div>
+    </template>
+
+    <!-- SERVICES -->
+    <template v-if="tab === 'services'">
+      <div class="page-header">
+        <div><h1>Services</h1><p>Capabilities & offerings shown on the site.</p></div>
+        <button class="btn btn-primary" @click="openPanel('service')">+ New Service</button>
+      </div>
+      <div class="toolbar"><input class="search-input" v-model="q" placeholder="Search services…" /></div>
+      <div class="table-card">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>#</th><th>Title</th><th>Description</th><th>Features</th><th></th></tr></thead>
+            
+            <!-- Robust tbody routing -->
+            <tbody v-if="loading">
+              <tr v-for="n in 5" :key="n"><td colspan="5"><div class="skeleton-row"><div class="skeleton"></div><div class="skeleton"></div></div></td></tr>
+            </tbody>
+            <tbody v-else-if="filteredServices.length === 0">
+              <tr><td colspan="5"><div class="empty-state">No services found.</div></td></tr>
+            </tbody>
+            <tbody v-else>
+              <tr v-for="s in filteredServices" :key="s.id">
+                <td style="font-family:var(--mono);color:var(--muted)">{{ s.sort_order }}</td>
+                <td class="td-title">{{ s.title }}</td>
+                <td class="td-desc">{{ s.description }}</td>
+                <td><span class="abbr-tag">{{ s.list_items.length }} items</span></td>
+                <td><div class="actions"><button class="btn btn-edit btn-sm" @click="openPanel('service',s)">Edit</button><button class="btn btn-danger btn-sm" @click="doDelete('services',s.id)">Delete</button></div></td>
+              </tr>
+            </tbody>
+
+          </table>
+        </div>
+      </div>
+    </template>
+
+    <!-- SKILL GROUPS -->
+    <template v-if="tab === 'skills'">
+      <div class="page-header">
+        <div><h1>Skill Groups</h1><p>Tools & Technologies categorizations.</p></div>
+        <button class="btn btn-primary" @click="openPanel('skillGroup')">+ New Group</button>
+      </div>
+      <div class="table-card">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Title</th><th>Color</th><th>Skills (Preview)</th><th>Count</th><th></th></tr></thead>
+            
+            <tbody v-if="loading">
+              <tr v-for="n in 5" :key="n"><td colspan="5"><div class="skeleton-row"><div class="skeleton"></div><div class="skeleton"></div></div></td></tr>
+            </tbody>
+            <tbody v-else-if="db.skillGroups.length === 0">
+              <tr><td colspan="5"><div class="empty-state">No skill groups found.</div></td></tr>
+            </tbody>
+            <tbody v-else>
+              <tr v-for="g in db.skillGroups" :key="g.id">
+                <td class="td-title">{{ g.title }}</td>
+                <td><span class="color-chip"><span class="color-dot" :class="'dot-'+g.color"></span>{{ g.color }}</span></td>
+                <td><span class="tag-pill" v-for="sk in g.skills.slice(0,4)" :key="sk">{{ sk }}</span><span class="tag-pill" v-if="g.skills.length>4">+{{ g.skills.length-4 }}</span></td>
+                <td><span class="abbr-tag">{{ g.skills.length }}</span></td>
+                <td><div class="actions"><button class="btn btn-edit btn-sm" @click="openPanel('skillGroup',g)">Edit</button><button class="btn btn-danger btn-sm" @click="doDelete('skill-groups',g.id)">Delete</button></div></td>
+              </tr>
+            </tbody>
+
+          </table>
+        </div>
+      </div>
+    </template>
+
+    <!-- ABOUT SECTION -->
+    <template v-if="tab === 'about'">
+      <div class="page-header"><div><h1>About Sub-Items</h1></div></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
+        
+        <!-- Chips Table -->
+        <div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:12px;"><strong>Profile Chips</strong><button class="btn btn-primary btn-sm" @click="openPanel('chip')">+ Add</button></div>
+          <div class="table-card"><div class="table-wrap"><table>
+            <thead><tr><th>Chip Name</th><th>Order</th><th></th></tr></thead>
+            <tbody v-if="loading"><tr><td colspan="3"><div class="skeleton-row"><div class="skeleton"></div></div></td></tr></tbody>
+            <tbody v-else-if="db.chips.length === 0"><tr><td colspan="3"><div class="empty-state">No chips found.</div></td></tr></tbody>
+            <tbody v-else>
+              <tr v-for="c in db.chips" :key="c.id">
+                <td><span class="tag-pill">{{ c.name }}</span></td>
+                <td style="color:var(--muted);font-family:var(--mono)">{{ c.sort_order }}</td>
+                <td><div class="actions"><button class="btn btn-edit btn-sm" @click="openPanel('chip',c)">Edit</button><button class="btn btn-danger btn-sm" @click="doDelete('chips',c.id)">Del</button></div></td>
+              </tr>
+            </tbody>
+          </table></div></div>
+        </div>
+
+        <!-- Values Table -->
+        <div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:12px;"><strong>Core Values</strong><button class="btn btn-primary btn-sm" @click="openPanel('value')">+ Add</button></div>
+          <div class="table-card"><div class="table-wrap"><table>
+            <thead><tr><th>Num</th><th>Title</th><th></th></tr></thead>
+            <tbody v-if="loading"><tr><td colspan="3"><div class="skeleton-row"><div class="skeleton"></div></div></td></tr></tbody>
+            <tbody v-else-if="db.values.length === 0"><tr><td colspan="3"><div class="empty-state">No values found.</div></td></tr></tbody>
+            <tbody v-else>
+              <tr v-for="v in db.values" :key="v.id">
+                <td><span class="abbr-tag">{{ v.num }}</span></td>
+                <td class="td-title">{{ v.title }}</td>
+                <td><div class="actions"><button class="btn btn-edit btn-sm" @click="openPanel('value',v)">Edit</button><button class="btn btn-danger btn-sm" @click="doDelete('values',v.id)">Del</button></div></td>
+              </tr>
+            </tbody>
+          </table></div></div>
+        </div>
+
+      </div>
+    </template>
+
+    <!-- CONTACT -->
+    <template v-if="tab === 'contact'">
+      <div class="page-header">
+        <div><h1>Contact Items</h1></div>
+        <button class="btn btn-primary" @click="openPanel('contact')">+ New Contact</button>
+      </div>
+      <div class="table-card">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Abbr</th><th>Label</th><th>Display</th><th>Ext</th><th></th></tr></thead>
+            <tbody v-if="loading">
+              <tr v-for="n in 3" :key="n"><td colspan="5"><div class="skeleton-row"><div class="skeleton"></div></div></td></tr>
+            </tbody>
+            <tbody v-else-if="db.contacts.length === 0">
+              <tr><td colspan="5"><div class="empty-state">No contacts found.</div></td></tr>
+            </tbody>
+            <tbody v-else>
+              <tr v-for="c in db.contacts" :key="c.id">
+                <td><span class="abbr-tag">{{ c.abbr }}</span></td>
+                <td class="td-title">{{ c.label }}</td>
+                <td class="td-desc">{{ c.display }}</td>
+                <td><span v-if="c.is_external" class="featured-badge" style="background:var(--blue-dim);color:var(--blue);border-color:rgba(74,143,232,0.2)">Yes</span></td>
+                <td><div class="actions"><button class="btn btn-edit btn-sm" @click="openPanel('contact',c)">Edit</button><button class="btn btn-danger btn-sm" @click="doDelete('contact',c.id)">Delete</button></div></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </template>
+
+  </main>
+
+  <!-- ── SIDE PANEL FOR FORMS ── -->
+  <div class="panel-mask" :class="{ open: panel.open }" @click="panel.open=false"></div>
+  <div class="panel" :class="{ open: panel.open }">
+    <div class="panel-header">
+      <div>
+        <h2>{{ panel.id ? 'Edit' : 'Create' }} {{ formTitle }}</h2>
+      </div>
+      <button class="panel-close" @click="panel.open=false">✕</button>
+    </div>
+    <div class="panel-body">
+
+      <template v-if="panel.type === 'project'">
+        <div class="form-grid">
+          <div class="form-g"><label>Title</label><input v-model="form.title" placeholder="Project Name" /></div>
+          <div class="form-g"><label>Abbr (3-4 chars)</label><input v-model="form.abbr" placeholder="PRJ" maxlength="4" style="text-transform:uppercase" /></div>
+        </div>
+        <div class="form-g"><label>Description</label><textarea v-model="form.description"></textarea></div>
+        <div class="form-g"><label>Link (URL)</label><input v-model="form.link" placeholder="https://" /></div>
+        <div class="form-grid">
+          <div class="form-g"><label>Tags (comma separated)</label><input v-model="form.tagsTxt" placeholder="React, Node" /></div>
+          <div class="form-g"><label>Stack (comma separated)</label><input v-model="form.stackTxt" placeholder="Python, FastAPI" /></div>
+        </div>
+        <div class="form-grid">
+          <div class="form-g">
+            <label>Color</label>
+            <select v-model="form.color">
+              <option value="cyan">Cyan</option><option value="purple">Purple</option>
+              <option value="blue">Blue</option><option value="green">Green</option>
+            </select>
+          </div>
+          <div class="form-g"><label>Sort Order</label><input type="number" v-model.number="form.sort_order" /></div>
+        </div>
+        <div class="form-g" style="display:flex;align-items:center;gap:8px;">
+          <input type="checkbox" id="p-feat" v-model="form.featured" style="width:16px;height:16px;accent-color:var(--blue);" />
+          <label for="p-feat" style="margin:0;cursor:pointer;">Featured Project</label>
+        </div>
+      </template>
+
+      <template v-if="panel.type === 'service'">
+        <div class="form-g"><label>Title</label><input v-model="form.title" /></div>
+        <div class="form-g"><label>Description</label><textarea v-model="form.description"></textarea></div>
+        <div class="form-g"><label>Features (One per line)</label><textarea v-model="form.linesTxt" rows="6"></textarea></div>
+        <div class="form-g"><label>Sort Order</label><input type="number" v-model.number="form.sort_order" /></div>
+      </template>
+
+      <template v-if="panel.type === 'skillGroup'">
+        <div class="form-grid">
+          <div class="form-g"><label>Group Title</label><input v-model="form.title" /></div>
+          <div class="form-g">
+            <label>Dot Color</label>
+            <select v-model="form.color">
+              <option value="cyan">Cyan</option><option value="purple">Purple</option>
+              <option value="blue">Blue</option><option value="green">Green</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-g"><label>Skills (One per line)</label><textarea v-model="form.linesTxt" rows="6"></textarea></div>
+        <div class="form-g"><label>Sort Order</label><input type="number" v-model.number="form.sort_order" /></div>
+      </template>
+
+      <template v-if="panel.type === 'chip'">
+        <div class="form-g"><label>Chip Name</label><input v-model="form.name" /></div>
+        <div class="form-g"><label>Sort Order</label><input type="number" v-model.number="form.sort_order" /></div>
+      </template>
+
+      <template v-if="panel.type === 'value'">
+        <div class="form-grid">
+          <div class="form-g"><label>Number (e.g. 01)</label><input v-model="form.num" /></div>
+          <div class="form-g"><label>Sort Order</label><input type="number" v-model.number="form.sort_order" /></div>
+        </div>
+        <div class="form-g"><label>Title</label><input v-model="form.title" /></div>
+        <div class="form-g"><label>Description</label><textarea v-model="form.description" rows="3"></textarea></div>
+      </template>
+
+      <template v-if="panel.type === 'contact'">
+        <div class="form-grid">
+          <div class="form-g"><label>Abbr</label><input v-model="form.abbr" /></div>
+          <div class="form-g"><label>Label</label><input v-model="form.label" /></div>
+        </div>
+        <div class="form-g"><label>Href Link</label><input v-model="form.href" /></div>
+        <div class="form-g"><label>Display Text</label><input v-model="form.display" /></div>
+        <div class="form-g" style="display:flex;align-items:center;gap:8px;">
+          <input type="checkbox" id="c-ext" v-model="form.is_external" style="width:16px;height:16px;accent-color:var(--blue);" />
+          <label for="c-ext" style="margin:0;cursor:pointer;">External Link (New Tab)</label>
+        </div>
+        <div class="form-g"><label>Sort Order</label><input type="number" v-model.number="form.sort_order" /></div>
+      </template>
+
+    </div>
+    <div class="panel-footer">
+      <button class="btn btn-ghost" @click="panel.open=false">Cancel</button>
+      <button class="btn btn-primary" @click="submitForm" :disabled="saving">
+        {{ saving ? 'Saving...' : 'Save Data' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- ── TOAST CONTAINER ── -->
+  <div class="toast-wrap">
+    <div class="toast" :class="t.type" v-for="t in toasts" :key="t.id">
+      {{ t.msg }}
+    </div>
+  </div>
+
+</div>
+
+<script>
+const { createApp } = Vue;
+
+const parseLines = str => (str || '').split('\n').map(s=>s.trim()).filter(Boolean);
+const parseCSV   = str => (str || '').split(',').map(s=>s.trim()).filter(Boolean);
+
+createApp({
+  data() {
+    return {
+      unlocked: false,
+      pinInput: '',
+      pinError: false,
+      tab: 'projects',
+      q: '',
+      loading: true,
+      saving: false,
+      db: { projects:[], services:[], skillGroups:[], chips:[], values:[], contacts:[] },
+      
+      nav: [
+        { key:'projects', label:'Projects', icon:'◈' },
+        { key:'services', label:'Services', icon:'◇' },
+        { key:'skills', label:'Skill Groups', icon:'◉' },
+        { key:'about', label:'About Area', icon:'◎' },
+        { key:'contact', label:'Contact Info', icon:'◐' },
+      ],
+
+      panel: { open: false, type: '', id: null },
+      form: {},
+      toasts: [],
+    }
+  },
+  
+  computed: {
+    counts() {
+      return {
+        projects: this.db.projects.length,
+        services: this.db.services.length,
+        skills: this.db.skillGroups.length,
+        about: this.db.chips.length + this.db.values.length,
+        contact: this.db.contacts.length
+      }
+    },
+    filteredProjects() {
+      if (!this.q) return this.db.projects;
+      const q = this.q.toLowerCase();
+      return this.db.projects.filter(p => p.title.toLowerCase().includes(q) || p.abbr.toLowerCase().includes(q));
+    },
+    filteredServices() {
+      if (!this.q) return this.db.services;
+      return this.db.services.filter(s => s.title.toLowerCase().includes(this.q.toLowerCase()));
+    },
+    formTitle() {
+      const titles = { project:'Project', service:'Service', skillGroup:'Skill Group', chip:'Chip', value:'Core Value', contact:'Contact' };
+      return titles[this.panel.type] || 'Item';
+    }
+  },
+
+  watch: { tab() { this.q = ''; } },
+
+  methods: {
+    checkPin() {
+      if (this.pinInput === '2006') {
+        localStorage.setItem('draxen_admin_pin', '2006');
+        this.unlocked = true;
+        this.pinError = false;
+        this.fetchAll();
+      } else {
+        this.pinError = true;
+        this.pinInput = '';
+      }
+    },
+    logout() {
+      localStorage.removeItem('draxen_admin_pin');
+      this.unlocked = false;
+      this.pinInput = '';
+    },
+    
+    notify(msg, type='success') {
+      const id = Date.now();
+      this.toasts.push({ id, msg, type });
+      setTimeout(() => { this.toasts = this.toasts.filter(t => t.id !== id); }, 3000);
+    },
+
+    async fetchAll() {
+      this.loading = true;
+      try {
+        const res = await fetch('/api/site-data');
+        const data = await res.json();
+        
+        this.db.projects = data.projects || [];
+        this.db.services = data.services || [];
+        this.db.skillGroups = data.skillGroups || [];
+        this.db.chips = data.chips || [];
+        this.db.values = data.values || [];
+        this.db.contacts = data.contactItems || [];
+      } catch(e) {
+        this.notify('Failed to load DB data', 'error');
+      }
+      this.loading = false;
+    },
+
+    openPanel(type, item=null) {
+      this.panel = { open: true, type, id: item?.id ?? null };
+      
+      // Initialize form bindings smoothly based on schemas
+      let f = { sort_order: item?.sort_order ?? 0 };
+      
+      if (type === 'project') {
+        f = { ...f, title: item?.title||'', abbr: item?.abbr||'', description: item?.description||'', link: item?.link||'', color: item?.color||'cyan', featured: item?.featured||false, tagsTxt: item?.tags?.join(', ')||'', stackTxt: item?.stack?.join(', ')||'' };
+      } else if (type === 'service') {
+        f = { ...f, title: item?.title||'', description: item?.description||'', linesTxt: item?.list_items?.join('\n')||'' };
+      } else if (type === 'skillGroup') {
+        f = { ...f, title: item?.title||'', color: item?.color||'cyan', linesTxt: item?.skills?.join('\n')||'' };
+      } else if (type === 'chip') {
+        f = { ...f, name: item?.name||'' };
+      } else if (type === 'value') {
+        f = { ...f, num: item?.num||'', title: item?.title||'', description: item?.description||'' };
+      } else if (type === 'contact') {
+        f = { ...f, abbr: item?.abbr||'', label: item?.label||'', href: item?.href||'', display: item?.display||'', is_external: item?.is_external ?? true };
+      }
+      this.form = f;
+    },
+
+    async submitForm() {
+      this.saving = true;
+      const type = this.panel.type;
+      let payload = {};
+      let endpoint = '';
+      
+      if (type === 'project') {
+        endpoint = 'projects';
+        payload = { title: this.form.title, abbr: this.form.abbr.toUpperCase(), description: this.form.description, link: this.form.link, color: this.form.color, featured: this.form.featured, sort_order: this.form.sort_order, tags: parseCSV(this.form.tagsTxt), stack: parseCSV(this.form.stackTxt) };
+      } else if (type === 'service') {
+        endpoint = 'services';
+        payload = { title: this.form.title, description: this.form.description, sort_order: this.form.sort_order, list_items: parseLines(this.form.linesTxt) };
+      } else if (type === 'skillGroup') {
+        endpoint = 'skill-groups';
+        payload = { title: this.form.title, color: this.form.color, sort_order: this.form.sort_order, skills: parseLines(this.form.linesTxt) };
+      } else if (type === 'chip') {
+        endpoint = 'chips';
+        payload = { name: this.form.name, sort_order: this.form.sort_order };
+      } else if (type === 'value') {
+        endpoint = 'values';
+        payload = { num: this.form.num, title: this.form.title, description: this.form.description, sort_order: this.form.sort_order };
+      } else if (type === 'contact') {
+        endpoint = 'contact';
+        payload = { abbr: this.form.abbr, label: this.form.label, href: this.form.href, display: this.form.display, is_external: this.form.is_external, sort_order: this.form.sort_order };
+      }
+
+      const url = this.panel.id ? `/api/${endpoint}/${this.panel.id}` : `/api/${endpoint}`;
+      
+      try {
+        const res = await fetch(url, {
+          method: this.panel.id ? 'PUT' : 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        
+        if (!res.ok) throw new Error('API Error: ' + await res.text());
+        
+        this.notify(`Successfully ${this.panel.id ? 'updated' : 'created'} item.`);
+        this.panel.open = false;
+        await this.fetchAll();
+      } catch (e) {
+        this.notify(e.message, 'error');
+      } finally {
+        this.saving = false;
+      }
+    },
+
+    async doDelete(endpoint, id) {
+      if (!confirm('Are you strictly sure you want to delete this row? It cannot be fully recovered.')) return;
+      try {
+        const res = await fetch(`/api/${endpoint}/${id}`, { method: 'DELETE' });
+        if (!res.ok) throw new Error('Failed to delete item');
+        this.notify('Deleted successfully.', 'info');
+        await this.fetchAll();
+      } catch(e) {
+        this.notify(e.message, 'error');
+      }
+    }
+  },
+
+  mounted() {
+    if (localStorage.getItem('draxen_admin_pin') === '2006') {
+      this.unlocked = true;
+      this.fetchAll();
+    }
+  }
+}).mount('#admin');
+</script>
+</body>
+</html>

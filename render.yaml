@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: draxen-ai-backend
+    env: python
+    # We set the rootDir because the FastAPI project is inside the 'backend' folder
+    rootDir: backend
+    
+    # Install all dependencies required for the backend
+    buildCommand: pip install -r requirements.txt
+    
+    # Start Uvicorn on the port assigned by Render.
+    startCommand: uvicorn app.app:app --host 0.0.0.0 --port $PORT
+    
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+
+      # Reminder regarding the DB:
+      # If you maintain a Free Tier instance, your instance file system is ephemeral.
+      # This means `database.db` will be wiped completely on instance spins-downs (due to 15m inactivity).
+      # If you need persistent data, you must upgrade your Render tier and mount a disk,
+      # or migrate to a managed Postgres/Mongo DB!

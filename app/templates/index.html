@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Aakash Atul Dandekar — Draxen AI. Freelance specialist in Agentic AI, Automation Pipelines, and Intelligent Systems." />
+  <meta name="keywords" content="agentic AI, automation, AI freelancer, LLM, AI agents, Draxen AI, Aakash Dandekar" />
+  <meta property="og:title" content="Draxen AI — Agentic AI & Automation" />
+  <meta property="og:description" content="Freelance AI engineering by Aakash Dandekar. Specializing in autonomous agents, workflow automation, and intelligent systems." />
+  <meta property="og:type" content="website" />
+  <title>Draxen AI — Agentic AI & Automation | Aakash Dandekar</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/style.css" />
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ── NAVIGATION ── -->
+  <nav id="navbar" class="navbar" :class="{ scrolled: navScrolled }">
+    <div class="nav-container">
+      <a href="#home" class="nav-logo">
+        <span class="logo-draxen">DRAXEN</span><span class="logo-ai">AI</span>
+      </a>
+      <ul class="nav-links" :class="{ open: menuOpen }" id="nav-links">
+        <li><a href="#about"    class="nav-link" :class="{ active: activeSection==='about' }"    @click="menuOpen=false">About</a></li>
+        <li><a href="#services" class="nav-link" :class="{ active: activeSection==='services' }" @click="menuOpen=false">Services</a></li>
+        <li><a href="#projects" class="nav-link" :class="{ active: activeSection==='projects' }" @click="menuOpen=false">Projects</a></li>
+        <li><a href="#skills"   class="nav-link" :class="{ active: activeSection==='skills' }"   @click="menuOpen=false">Skills</a></li>
+        <li><a href="#contact"  class="nav-link nav-cta"                                          @click="menuOpen=false">Let's Talk</a></li>
+      </ul>
+      <button class="hamburger" :class="{ open: menuOpen }" @click="menuOpen=!menuOpen" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ── HERO ── -->
+  <section id="home" class="hero">
+    <canvas id="particle-canvas"></canvas>
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <div class="hero-badge">
+        <span class="badge-dot"></span>
+        <span>Available for Projects</span>
+      </div>
+      <h1 class="hero-title">
+        <span class="hero-tagline">Building <span class="gradient-text">Autonomous Agents</span></span>
+        <br />
+        <span class="hero-tagline">That Work For You.</span>
+      </h1>
+      <p class="hero-sub">
+        Founder of <strong>Draxen AI</strong> · Freelance Engineer specializing in<br />
+        Agentic AI Systems &amp; Intelligent Automation Pipelines
+      </p>
+      <div class="hero-actions">
+        <a href="#projects" class="btn btn-primary" id="hero-projects-btn">View My Work</a>
+        <a href="#contact"  class="btn btn-ghost"   id="hero-contact-btn">Start a Project</a>
+      </div>
+    </div>
+    <div class="scroll-indicator">
+      <div class="scroll-arrow"></div>
+    </div>
+  </section>
+
+  <!-- ── TICKER ── -->
+  <div class="ticker-wrap">
+    <div class="ticker">
+      <template v-for="n in 2" :key="n">
+        <template v-for="item in tickerItems" :key="n + item">
+          <span>{{ item }}</span><span class="sep">✦</span>
+        </template>
+      </template>
+    </div>
+  </div>
+
+  <!-- ── ABOUT ── -->
+  <section id="about" class="section about-section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Who I Am</span>
+        <h2 class="section-title">Engineer. Builder. <span class="gradient-text">Visionary.</span></h2>
+      </div>
+      <div class="about-grid">
+        <div class="about-visual">
+          <div class="about-card glass-card">
+            <div class="about-avatar">
+              <div class="avatar-ring"></div>
+              <div class="avatar-initials">AAD</div>
+              <div class="avatar-status"></div>
+            </div>
+            <div class="about-card-info">
+              <h3>Aakash Atul Dandekar</h3>
+              <span class="about-card-role">Founder &amp; AI Engineer</span>
+              <div class="about-card-badges">
+                <span class="chip" v-for="chip in chips" :key="chip">{{ chip }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="about-decoration"></div>
+        </div>
+        <div class="about-content">
+          <p class="about-text">
+            I'm a freelance AI engineer and the founder of <strong>Draxen AI LLC</strong>, focused on building
+            intelligent systems that actually work in the real world. My expertise lies at the intersection of
+            <em>large language models, agentic frameworks, and production-grade automation pipelines</em>.
+          </p>
+          <p class="about-text">
+            From designing multi-agent orchestration systems to building voice-powered assistants and automated
+            backend APIs — I craft solutions that reduce manual effort, accelerate decision-making, and unlock
+            new capabilities for businesses ready to embrace AI.
+          </p>
+          <p class="about-text">
+            Every project I take on is built with <em>clarity of purpose</em>, robust engineering, and a commitment
+            to delivering measurable value.
+          </p>
+          <div class="about-values">
+            <div class="value-item reveal" v-for="val in values" :key="val.num">
+              <div class="value-icon">{{ val.num }}</div>
+              <div>
+                <strong>{{ val.title }}</strong>
+                <span>{{ val.desc }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── SERVICES ── -->
+  <section id="services" class="section services-section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">What I Do</span>
+        <h2 class="section-title">Services &amp; <span class="gradient-text">Capabilities</span></h2>
+        <p class="section-sub">From idea to deployed agent — I handle the full stack of AI engineering.</p>
+      </div>
+      <div class="services-grid">
+        <div class="service-card glass-card reveal"
+             v-for="svc in services"
+             :key="svc.id"
+             :id="svc.id">
+          <h3 class="service-title">{{ svc.title }}</h3>
+          <p class="service-desc">{{ svc.desc }}</p>
+          <ul class="service-list">
+            <li v-for="item in svc.list" :key="item">{{ item }}</li>
+          </ul>
+          <div class="service-glow"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── PROJECTS ── -->
+  <section id="projects" class="section projects-section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">My Work</span>
+        <h2 class="section-title">Featured <span class="gradient-text">Projects</span></h2>
+        <p class="section-sub">A selection of real-world AI systems I've built and shipped.</p>
+      </div>
+      <div class="projects-grid">
+        <div class="project-card glass-card reveal"
+             v-for="proj in projects"
+             :key="proj.id"
+             :id="proj.id"
+             :class="{ featured: proj.featured }">
+          <div class="project-header">
+            <div class="project-meta">
+              <span class="project-tag" v-for="tag in proj.tags" :key="tag">{{ tag }}</span>
+            </div>
+            <div class="project-links">
+              <a :href="proj.link" target="_blank" rel="noopener" class="proj-link" aria-label="View on GitHub">↗</a>
+            </div>
+          </div>
+          <div class="project-visual">
+            <div class="project-icon-lg">{{ proj.abbr }}</div>
+            <div class="project-glow-orb" :class="proj.color"></div>
+          </div>
+          <h3 class="project-title">{{ proj.title }}</h3>
+          <p class="project-desc">{{ proj.desc }}</p>
+          <div class="project-stack">
+            <span class="stack-pill" v-for="pill in proj.stack" :key="pill">{{ pill }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── SKILLS ── -->
+  <section id="skills" class="section skills-section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Tech Stack</span>
+        <h2 class="section-title">Tools &amp; <span class="gradient-text">Technologies</span></h2>
+      </div>
+      <div class="skills-grid">
+        <div class="skill-group glass-card reveal"
+             v-for="group in skillGroups"
+             :key="group.title">
+          <h3 class="skill-group-title">{{ group.title }}</h3>
+          <div class="skill-items">
+            <div class="skill-item" v-for="skill in group.skills" :key="skill">
+              <span class="skill-dot" :class="group.color"></span>{{ skill }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── CONTACT ── -->
+  <section id="contact" class="section contact-section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Get In Touch</span>
+        <h2 class="section-title">Let's Build <span class="gradient-text">Something Great</span></h2>
+        <p class="section-sub">Have a project in mind? I'd love to hear about it. Let's see what we can create together.</p>
+      </div>
+      <div class="contact-grid">
+        <div class="contact-info">
+          <div class="contact-item glass-card reveal"
+               v-for="c in contactItems"
+               :key="c.label"
+               :id="c.id">
+            <div class="contact-icon contact-icon--text">{{ c.abbr }}</div>
+            <div>
+              <strong>{{ c.label }}</strong>
+              <a :href="c.href"
+                 :target="c.external ? '_blank' : null"
+                 :rel="c.external ? 'noopener' : null">{{ c.display }}</a>
+            </div>
+          </div>
+          <div class="contact-availability glass-card reveal">
+            <span class="avail-dot"></span>
+            <span>Open to new projects &amp; contracts</span>
+          </div>
+        </div>
+        <div class="contact-form-wrap reveal">
+          <form class="contact-form glass-card" id="contact-form" @submit.prevent="submitForm" novalidate>
+            <div class="form-group">
+              <label for="fname">Your Name</label>
+              <input type="text" id="fname" v-model="form.name" placeholder="e.g. Jane Smith" required />
+            </div>
+            <div class="form-group">
+              <label for="femail">Email Address</label>
+              <input type="email" id="femail" v-model="form.email" placeholder="jane@company.com" required />
+            </div>
+            <div class="form-group">
+              <label for="ftype">Project Type</label>
+              <select id="ftype" v-model="form.projectType">
+                <option value="">Select a category…</option>
+                <option v-for="opt in projectTypeOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="fmessage">Tell Me About Your Project</label>
+              <textarea id="fmessage" v-model="form.message" rows="4"
+                placeholder="Describe what you're looking to build, your timeline, and any specific requirements…"
+                required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary btn-full" id="form-submit-btn" :disabled="formSubmitting">
+              <span class="btn-text">{{ formSubmitting ? 'Sending…' : 'Send Message' }}</span>
+              <span class="btn-icon" v-if="!formSubmitting">→</span>
+            </button>
+            <div class="form-success" :class="{ visible: formSubmitted }">
+              Message sent — I'll be in touch within 24 hours.
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── FOOTER ── -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <span class="logo-draxen">DRAXEN</span><span class="logo-ai">AI</span>
+          <p>Agentic AI &amp; Automation Engineering</p>
+        </div>
+        <div class="footer-links">
+          <a href="#about">About</a>
+          <a href="#services">Services</a>
+          <a href="#projects">Projects</a>
+          <a href="#contact">Contact</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2026 Draxen AI LLC — Aakash Atul Dandekar. All rights reserved.</span>
+        <span class="footer-tag">Built with AI</span>
+      </div>
+    </div>
+  </footer>
+
+</div><!-- #app -->
+
+<script src="/static/app.js"></script>
+</body>
+</html>
