@@ -1,4 +1,3 @@
-"""Initial seed data — runs once when collections are empty."""
 from pymongo.database import Database
 
 def seed_if_empty(db: Database) -> None:

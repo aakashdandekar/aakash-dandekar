@@ -1,10 +1,5 @@
-/* ════════════════════════════════════════════════
-   DRAXEN AI — Vue 3 CDN App
-   Data sourced live from FastAPI backend.
-════════════════════════════════════════════════ */
-
 const { createApp } = Vue;
-const API_BASE = '';  // same-origin: frontend served by FastAPI at localhost:8000
+const API_BASE = window.location.origin;
 
 createApp({
 
@@ -92,8 +87,43 @@ createApp({
         }));
 
       } catch (err) {
-        console.error('[Draxen AI] Could not reach API:', err);
+        console.error('Could not reach API:', err);
         this.apiError = true;
+
+        this.projects = [
+          {
+            id: 1,
+            title: "AI Assistant RAG",
+            desc: "Retrieval-based assistant using vector DB",
+            tags: ["RAG", "LLM"],
+            stack: ["Python", "LangChain"],
+            link: "#"
+          }
+        ];
+
+        this.services = [
+          {
+            id: 1,
+            title: "Agentic AI Systems",
+            desc: "Build intelligent multi-agent systems",
+            list: ["LangChain", "Multi-agent", "Automation"]
+          }
+        ];
+
+        this.skillGroups = [
+          {
+            title: "AI & LLM",
+            color: "cyan",
+            skills: ["LangChain", "Prompt Engineering"]
+          }
+        ];
+
+        this.chips = ["AI", "Automation", "LLM"];
+        this.values = [
+          { num: "01", title: "Results First", desc: "Solve real problems" }
+        ];
+
+        this.contactItems = [];
       }
     },
 
@@ -121,7 +151,7 @@ createApp({
         // Hide success message after 6 seconds
         setTimeout(() => { this.formSubmitted = false; }, 6000);
       } catch (err) {
-        console.error('[Draxen AI] Contact form error:', err);
+        console.error('Contact form error:', err);
         alert("There was an issue sending your message. Please email me directly!");
       } finally {
         this.formSubmitting = false;
@@ -142,7 +172,8 @@ createApp({
         canvas.height = window.innerHeight;
       };
       resize();
-      window.addEventListener('resize', () => { resize(); init(); });
+      const reinit = () => { resize(); particles = []; init(); animate(); };
+      window.addEventListener('resize', reinit);
       window.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
       window.addEventListener('mouseleave', () => { mouse.x = null; mouse.y = null; });
 
@@ -266,7 +297,7 @@ createApp({
       this.initSectionObserver();
     });
 
-    console.log('%c DRAXEN AI', 'color:#4a90d9;font-size:2rem;font-weight:900;');
+    console.log('%c Aakash Dandekar', 'color:#4a90d9;font-size:2rem;font-weight:900;');
     console.log('%c Vue 3 + FastAPI · Built by Aakash Dandekar', 'color:#8a96aa;');
   },
 

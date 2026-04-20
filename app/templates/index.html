@@ -3,27 +3,31 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Aakash Atul Dandekar — Draxen AI. Freelance specialist in Agentic AI, Automation Pipelines, and Intelligent Systems." />
-  <meta name="keywords" content="agentic AI, automation, AI freelancer, LLM, AI agents, Draxen AI, Aakash Dandekar" />
-  <meta property="og:title" content="Draxen AI — Agentic AI & Automation" />
+  <meta name="description" content="Aakash Atul Dandekar. Freelance specialist in Agentic AI, Automation Pipelines, and Intelligent Systems." />
+  <meta name="keywords" content="agentic AI, automation, AI freelancer, LLM, AI agents, Aakash Dandekar" />
+  <meta property="og:title" content="Aakash Dandekar" />
   <meta property="og:description" content="Freelance AI engineering by Aakash Dandekar. Specializing in autonomous agents, workflow automation, and intelligent systems." />
   <meta property="og:type" content="website" />
-  <title>Draxen AI — Agentic AI & Automation | Aakash Dandekar</title>
+  <title>Aakash Dandekar | AI Developer</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/static/style.css" />
+  <link rel="stylesheet" href="/static/style.css?v=2" />
   <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
 </head>
 <body>
 
 <div id="app">
 
+  <div v-if="apiError" style="color:red; text-align:center; padding:10px;">
+    API not reachable — showing fallback data
+  </div>
+
   <!-- ── NAVIGATION ── -->
   <nav id="navbar" class="navbar" :class="{ scrolled: navScrolled }">
     <div class="nav-container">
       <a href="#home" class="nav-logo">
-        <span class="logo-draxen">DRAXEN</span><span class="logo-ai">AI</span>
+        <span class="logo-name">Aakash </span><span class="logo-last-name">Dandekar</span>
       </a>
       <ul class="nav-links" :class="{ open: menuOpen }" id="nav-links">
         <li><a href="#about"    class="nav-link" :class="{ active: activeSection==='about' }"    @click="menuOpen=false">About</a></li>
@@ -53,7 +57,7 @@
         <span class="hero-tagline">That Work For You.</span>
       </h1>
       <p class="hero-sub">
-        Founder of <strong>Draxen AI</strong> · Freelance Engineer specializing in<br />
+        Freelance Engineer specializing in<br />
         Agentic AI Systems &amp; Intelligent Automation Pipelines
       </p>
       <div class="hero-actions">
@@ -104,7 +108,7 @@
         </div>
         <div class="about-content">
           <p class="about-text">
-            I'm a freelance AI engineer and the founder of <strong>Draxen AI LLC</strong>, focused on building
+            I'm Third Year B.Tech CSE student and a freelance AI engineer, focused on building
             intelligent systems that actually work in the real world. My expertise lies at the intersection of
             <em>large language models, agentic frameworks, and production-grade automation pipelines</em>.
           </p>
@@ -277,7 +281,7 @@
     <div class="container">
       <div class="footer-top">
         <div class="footer-brand">
-          <span class="logo-draxen">DRAXEN</span><span class="logo-ai">AI</span>
+          <span class="logo-name">Aakash</span><span class="logo-last-name">Dandekar</span>
           <p>Agentic AI &amp; Automation Engineering</p>
         </div>
         <div class="footer-links">
@@ -288,8 +292,7 @@
         </div>
       </div>
       <div class="footer-bottom">
-        <span>© 2026 Draxen AI LLC — Aakash Atul Dandekar. All rights reserved.</span>
-        <span class="footer-tag">Built with AI</span>
+        <span>© 2026 Aakash Atul Dandekar. All rights reserved.</span>
       </div>
     </div>
   </footer>

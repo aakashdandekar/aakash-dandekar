@@ -3,13 +3,13 @@ from pymongo import MongoClient
 from pymongo.database import Database
 from app.core.config import settings
 
-_client = None
+client = None
 
 def get_db() -> Database:
-    global _client
-    if _client is None:
-        _client = MongoClient(settings.MONGO_URI)
-    return _client[settings.DB_NAME]
+    global client
+    if client is None:
+        client = MongoClient(settings.MONGO_URI)
+    return client[settings.DB_NAME]
 
 def init_db() -> None:
     from .seed import seed_if_empty

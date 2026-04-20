@@ -1,10 +1,5 @@
-"""Pydantic request/response models and SQLite row parsers."""
-import json
 from pydantic import BaseModel
 from typing import List
-
-
-# ── Request models ─────────────────────────────────────────────────────────────
 
 class ProjectIn(BaseModel):
     title: str
